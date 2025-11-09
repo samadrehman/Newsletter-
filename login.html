@@ -1,44 +1,119 @@
-<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>Login with PIN</title></head><body style="font-family:Arial;padding:30px;display:flex;align-items:center;justify-content:center">
-<div style="width:360px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.08)">
-  <h3>Enter Email & PIN</h3>
-  <form id="login">
-    <input name="email" type="email" placeholder="your@email.com" required style="width:100%;padding:10px">
-    <input name="pin" placeholder="6-digit PIN" maxlength="6" required style="width:100%;padding:10px;margin-top:8px">
-    <input name="hp" style="display:none">
-    <button style="width:100%;padding:10px;margin-top:10px">Verify</button>
-  </form>
-  <div style="margin-top:8px"><a href="index.html">Resend PIN</a></div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – Newsletter Community</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 350px;
+      text-align: center;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background: #2196f3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #1976d2;
+    }
+    .message {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEfT01mPoVxLiJwknxGz0fPQXeX6l5KO8BW407MSRWThWQU6kjHTizi6d4XuzLy1E/exec";
-const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
-function getFingerprint(){ try{ return btoa(navigator.userAgent+"||"+screen.width+"x"+screen.height+"||"+Intl.DateTimeFormat().resolvedOptions().timeZone);}catch(e){return navigator.userAgent||""}}
-function appendCommon(fd){ fd.append("key", SECRET_KEY); fd.append("ref", window.location.origin); fd.append("fp", getFingerprint()); if(!fd.get("hp")) fd.append("hp",""); }
+  <div class="login-box">
+    <h2>🔐 Login</h2>
+    <p>Enter your email and 6-digit PIN</p>
+    <input type="email" id="email" placeholder="Your email" required><br>
+    <input type="text" id="pin" maxlength="6" placeholder="6-digit PIN" required><br>
+    <button id="loginBtn">Login</button>
+    <div class="message" id="msg"></div>
+  </div>
 
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUSMmJgSq90xvbAjSYYCf24sq9iCOSa1SeK6jEdebrPBjFb_xEcXbq_LSTY5T6Z7Ks/exec";
+    const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
 
-document.getElementById('login').addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  const fd = new FormData(ev.target);
-  fd.append("action","verifyPin");
-  appendCommon(fd);
-  try{
-    const res = await fetch(SCRIPT_URL, { method:"POST", body: fd });
-    const text = await res.text();
-    try{
-      const obj = JSON.parse(text);
-      if(obj.token){
-        localStorage.setItem("authToken", obj.token);
-        localStorage.setItem("authEmail", fd.get("email"));
-        alert("Verified — redirecting to dashboard");
-        window.location.href = "dashboard.html";
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const pin = document.getElementById("pin").value.trim();
+      const msg = document.getElementById("msg");
+
+      if (!email || !pin) {
+        msg.textContent = "⚠️ Please enter both email and PIN.";
+        msg.style.color = "red";
         return;
       }
-    }catch(e){}
-    alert(text);
-  }catch(err){ alert("Network error"); }
-});
-</script>
-</body></html>
+
+      msg.textContent = "⏳ Verifying...";
+      msg.style.color = "#555";
+
+      try {
+        const params = new URLSearchParams({
+          action: "verifyPin",
+          key: SECRET_KEY,
+          email,
+          pin,
+          origin: window.location.origin
+        });
+
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: params
+        });
+
+        const text = await response.text();
+        console.log("Response:", text);
+
+        if (text.includes("Success: Verified")) {
+          msg.textContent = "✅ Login successful! Redirecting...";
+          msg.style.color = "green";
+
+          // Save session info (optional)
+          localStorage.setItem("userEmail", email);
+
+          // Redirect after 1.5 seconds
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1500);
+        } else {
+          msg.textContent = text.replace("Error:", "⚠️");
+          msg.style.color = "red";
+        }
+
+      } catch (err) {
+        msg.textContent = "❌ Network error. Please try again.";
+        msg.style.color = "red";
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
