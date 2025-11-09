@@ -1,47 +1,64 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>Community</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community – Newsletter</title>
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #fffaf0, #eef5ff);
       padding: 24px;
       margin: 0;
     }
+
+    h2 {
+      text-align: center;
+      color: #5c2e91;
+      margin-bottom: 20px;
+    }
+
     #posts {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
       max-width: 1100px;
       margin: 0 auto;
     }
-    .post {
+
+    .card {
       background: #fff;
       padding: 14px;
       border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
       position: relative;
+      transition: transform 0.2s ease;
     }
-    h3 {
+
+    .card:hover {
+      transform: translateY(-3px);
+    }
+
+    .card h3 {
       color: #4b2b7f;
-      margin: 0 0 6px;
+      margin-top: 0;
     }
-    p {
+
+    .card p {
       color: #333;
       white-space: pre-wrap;
     }
-    small {
-      color: #666;
+
+    .meta {
+      color: #555;
+      font-size: 14px;
+      margin-top: 8px;
     }
   </style>
 </head>
-
 <body>
-  <h2 style="text-align:center;color:#5c2e91">📰 Community Stories</h2>
-  <div id="posts">Loading...</div>
+  <h2>📰 Community Stories</h2>
+  <div id="posts">Loading posts...</div>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeHK6aNP-6z1c7T6X1H9JxGK5gMkR6umLPrATSgVqgg0MUV9kCK3_qwHPLn3IDU98E/exec";
@@ -52,8 +69,10 @@
       container.innerHTML = "<p>Loading posts...</p>";
 
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=getPosts&key=${SECRET_KEY}&origin=${window.location.origin}`);
+        const url = `${SCRIPT_URL}?action=getPosts&key=${SECRET_KEY}&origin=${window.location.origin}`;
+        const response = await fetch(url);
         const text = await response.text();
+
         console.log("Raw response:", text);
 
         let posts;
@@ -61,7 +80,7 @@
           posts = JSON.parse(text);
         } catch (err) {
           console.error("JSON parse error:", err);
-          container.innerHTML = "<p>Failed to load posts. Try again later.</p>";
+          container.innerHTML = "<p>⚠️ Failed to load posts. Try again later.</p>";
           return;
         }
 
@@ -72,14 +91,14 @@
 
         container.innerHTML = "";
         posts.reverse().forEach(post => {
-          const div = document.createElement("div");
-          div.className = "post";
-          div.innerHTML = `
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
             <h3>${post.title}</h3>
             <p>${post.content}</p>
-            <small>✍️ By ${post.name} • ${new Date(post.timestamp).toLocaleString()}</small>
+            <div class="meta">✍️ ${post.name} • ${new Date(post.timestamp).toLocaleString()}</div>
           `;
-          container.appendChild(div);
+          container.appendChild(card);
         });
       } catch (error) {
         console.error("Error loading posts:", error);
