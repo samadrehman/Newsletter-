@@ -78,6 +78,7 @@
     <h2 id="welcomeText">Checking login...</h2>
     <p>Here you can submit stories, check community updates, and manage your profile.</p>
     <button onclick="goToCommunity()">Go to Community</button>
+    <button onclick="goToStory()">Go to Story Submission</button>
     <button onclick="logout()">Logout</button>
   </div>
 
@@ -107,6 +108,10 @@
 
     function goToCommunity() {
       window.location.href = "community.html";
+    }
+
+    function goToStory() {
+      window.location.href = "story.html";
     }
   </script>
 </body>
