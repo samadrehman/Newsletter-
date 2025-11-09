@@ -28,8 +28,6 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUSMmJgSq90xvbAjSYY
 const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
 function getFingerprint(){ try { return btoa(navigator.userAgent+"||"+screen.width+"x"+screen.height+"||"+Intl.DateTimeFormat().resolvedOptions().timeZone); }catch(e){return navigator.userAgent||"unk"} }
 function appendCommon(fd){ fd.append("key", SECRET_KEY); fd.append("ref", window.location.origin); fd.append("fp", getFingerprint()); if(!fd.get("hp")) fd.append("hp",""); }
-function disableInspectShortcuts(){ window.addEventListener("keydown",function(e){ if(e.key==="F12" || (e.ctrlKey && e.shiftKey && (e.key==="I"||e.key==="C"||e.key==="J")) || (e.ctrlKey && e.key==="U")){ e.preventDefault(); alert("Shortcut disabled."); return false; } }); window.addEventListener("contextmenu",e=>e.preventDefault()); }
-disableInspectShortcuts();
 
 document.getElementById('subForm').addEventListener('submit', async function(ev){
   ev.preventDefault();
