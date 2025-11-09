@@ -143,50 +143,51 @@
 
     closePopup.onclick = () => popup.style.display = "none";
 
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+    // ✅ Wait for DOM to load before attaching the listener
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginBtn = document.getElementById("loginBtn");
 
-  const email = document.getElementById("email").value.trim();
-  const pin = document.getElementById("pin").value.trim();
+      loginBtn.addEventListener("click", async () => {
+        const email = document.getElementById("email").value.trim();
+        const pin = document.getElementById("pin").value.trim();
 
-  if (!email || !pin) {
-    showPopup("⚠️ Missing Info", "Please enter both email and PIN.");
-    return;
-  }
+        if (!email || !pin) {
+          showPopup("⚠️ Missing Info", "Please enter both email and PIN.");
+          return;
+        }
 
-  const formData = new URLSearchParams();
-  formData.append("action", "verifyPin");
-  formData.append("email", email);
-  formData.append("pin", pin);
-  formData.append("key", "v8YhT93NfZ2jP6mXcA7rL1kE5s");
-  formData.append("origin", window.location.origin);
+        const formData = new URLSearchParams();
+        formData.append("action", "verifyPin");
+        formData.append("email", email);
+        formData.append("pin", pin);
+        formData.append("key", SECRET_KEY);
+        formData.append("origin", window.location.origin);
 
-  try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbxEfT01mPoVxLiJwknxGz0fPQXeX6l5KO8BW407MSRWThWQU6kjHTizi6d4XuzLy1E/exec", {
-      method: "POST",
-      body: formData,
+        try {
+          const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: formData,
+          });
+
+          const text = await response.text();
+          console.log("Server response:", text);
+
+          if (text.includes("Success: Verified")) {
+            localStorage.setItem("userEmail", email);
+            showPopup("✅ Login Successful", "Redirecting to your dashboard...", true);
+
+            setTimeout(() => {
+              window.location.href = "dashboard.html"; // ✅ redirect here
+            }, 1800);
+          } else {
+            showPopup("❌ Login Failed", "Invalid email or PIN. Please try again.");
+          }
+        } catch (error) {
+          showPopup("⚠️ Network Error", "Something went wrong. Please try again later.");
+          console.error(error);
+        }
+      });
     });
-
-    const text = await response.text();
-    console.log("Server response:", text);
-
-    if (text.includes("Success: Verified")) {
-      localStorage.setItem("userEmail", email);
-
-      showPopup("✅ Login Successful", "Redirecting to your dashboard...", true);
-
-      setTimeout(() => {
-        window.location.href = "https://samadrehman.github.io/Newsletter-/dashboard.html";
-      }, 1800);
-    } else {
-      showPopup("❌ Login Failed", "Invalid email or PIN. Please try again.");
-    }
-  } catch (error) {
-    showPopup("⚠️ Network Error", "Something went wrong. Please try again later.");
-    console.error(error);
-  }
-});
-
   </script>
 </body>
 </html>
