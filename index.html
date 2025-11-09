@@ -1,0 +1,47 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Subscribe</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;background:#f3f5ff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+  .card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.08);width:360px}
+  input,button{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid #ddd}
+  button{background:#5c2e91;color:#fff;border:none}
+  .muted{color:#666;font-size:0.9rem;margin-top:8px}
+</style>
+</head><body>
+<div class="card">
+  <h2>Subscribe</h2>
+  <form id="subForm">
+    <input name="name" placeholder="Name">
+    <input name="email" type="email" placeholder="Email" required>
+    <!-- honeypot (hidden) -->
+    <input name="hp" style="display:none">
+    <button type="submit">Send PIN</button>
+  </form>
+  <div class="muted">After subscribing check your email for a 6-digit PIN. Then <a href="login.html">login</a>.</div>
+</div>
+
+<!-- common -->
+<script>
+/* paste client-common.js content here (or link it) */
+const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYED_ID/exec";
+const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
+function getFingerprint(){ try { return btoa(navigator.userAgent+"||"+screen.width+"x"+screen.height+"||"+Intl.DateTimeFormat().resolvedOptions().timeZone); }catch(e){return navigator.userAgent||"unk"} }
+function appendCommon(fd){ fd.append("key", SECRET_KEY); fd.append("ref", window.location.origin); fd.append("fp", getFingerprint()); if(!fd.get("hp")) fd.append("hp",""); }
+function disableInspectShortcuts(){ window.addEventListener("keydown",function(e){ if(e.key==="F12" || (e.ctrlKey && e.shiftKey && (e.key==="I"||e.key==="C"||e.key==="J")) || (e.ctrlKey && e.key==="U")){ e.preventDefault(); alert("Shortcut disabled."); return false; } }); window.addEventListener("contextmenu",e=>e.preventDefault()); }
+disableInspectShortcuts();
+
+document.getElementById('subForm').addEventListener('submit', async function(ev){
+  ev.preventDefault();
+  const fd = new FormData(ev.target);
+  fd.append("action","subscribe");
+  appendCommon(fd);
+  try{
+    const r = await fetch(SCRIPT_URL, { method: "POST", body: fd });
+    const text = await r.text();
+    alert(text);
+    if(text.includes("PIN Sent")) window.location.href = "login.html";
+  }catch(err){ alert("Network error"); }
+});
+</script>
+</body></html>

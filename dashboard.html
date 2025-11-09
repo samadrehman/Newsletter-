@@ -1,0 +1,24 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Dashboard</title>
+<style>
+  body{font-family:Arial;background:linear-gradient(135deg,#f3e5f5,#f0f8ff);height:100vh;display:flex;justify-content:center;align-items:center;margin:0}
+  .wrap{display:flex;gap:20px}
+  .box{width:280px;height:180px;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+  .box h3{color:#5c2e91;margin:0}
+</style>
+</head><body>
+<div class="wrap">
+  <div class="box" onclick="go('story.html')"><h3>✍️ Share Your Story</h3><p>Write & submit</p></div>
+  <div class="box" onclick="go('community.html')"><h3>🌍 View Community</h3><p>Read approved posts</p></div>
+</div>
+
+<script>
+function go(url){ window.location.href = url; }
+(function(){ // basic protect: ensure logged in
+  const t = localStorage.getItem("authToken");
+  const e = localStorage.getItem("authEmail");
+  if(!t||!e){ alert("Please login first"); window.location.href = "login.html"; }
+})();
+</script>
+</body></html>

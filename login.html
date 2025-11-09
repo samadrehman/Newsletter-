@@ -1,0 +1,45 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Login with PIN</title></head><body style="font-family:Arial;padding:30px;display:flex;align-items:center;justify-content:center">
+<div style="width:360px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.08)">
+  <h3>Enter Email & PIN</h3>
+  <form id="login">
+    <input name="email" type="email" placeholder="your@email.com" required style="width:100%;padding:10px">
+    <input name="pin" placeholder="6-digit PIN" maxlength="6" required style="width:100%;padding:10px;margin-top:8px">
+    <input name="hp" style="display:none">
+    <button style="width:100%;padding:10px;margin-top:10px">Verify</button>
+  </form>
+  <div style="margin-top:8px"><a href="index.html">Resend PIN</a></div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYED_ID/exec";
+const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
+function getFingerprint(){ try{ return btoa(navigator.userAgent+"||"+screen.width+"x"+screen.height+"||"+Intl.DateTimeFormat().resolvedOptions().timeZone);}catch(e){return navigator.userAgent||""}}
+function appendCommon(fd){ fd.append("key", SECRET_KEY); fd.append("ref", window.location.origin); fd.append("fp", getFingerprint()); if(!fd.get("hp")) fd.append("hp",""); }
+function disableInspect(){ window.addEventListener("keydown", function(e){ if(e.key==="F12" || (e.ctrlKey && e.shiftKey && (e.key==="I"||e.key==="C"||e.key==="J")) || (e.ctrlKey && e.key==="U")){ e.preventDefault(); alert("Shortcut disabled."); } }); window.addEventListener("contextmenu",e=>e.preventDefault()); }
+disableInspect();
+
+document.getElementById('login').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const fd = new FormData(ev.target);
+  fd.append("action","verifyPin");
+  appendCommon(fd);
+  try{
+    const res = await fetch(SCRIPT_URL, { method:"POST", body: fd });
+    const text = await res.text();
+    try{
+      const obj = JSON.parse(text);
+      if(obj.token){
+        localStorage.setItem("authToken", obj.token);
+        localStorage.setItem("authEmail", fd.get("email"));
+        alert("Verified — redirecting to dashboard");
+        window.location.href = "dashboard.html";
+        return;
+      }
+    }catch(e){}
+    alert(text);
+  }catch(err){ alert("Network error"); }
+});
+</script>
+</body></html>
