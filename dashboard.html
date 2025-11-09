@@ -1,24 +1,113 @@
-<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>Dashboard</title>
-<style>
-  body{font-family:Arial;background:linear-gradient(135deg,#f3e5f5,#f0f8ff);height:100vh;display:flex;justify-content:center;align-items:center;margin:0}
-  .wrap{display:flex;gap:20px}
-  .box{width:280px;height:180px;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
-  .box h3{color:#5c2e91;margin:0}
-</style>
-</head><body>
-<div class="wrap">
-  <div class="box" onclick="go('story.html')"><h3>✍️ Share Your Story</h3><p>Write & submit</p></div>
-  <div class="box" onclick="go('community.html')"><h3>🌍 View Community</h3><p>Read approved posts</p></div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Newsletter Community</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #c3e0ff, #ffffff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
 
-<script>
-function go(url){ window.location.href = url; }
-(function(){ // basic protect: ensure logged in
-  const t = localStorage.getItem("authToken");
-  const e = localStorage.getItem("authEmail");
-  if(!t||!e){ alert("Please login first"); window.location.href = "login.html"; }
-})();
-</script>
-</body></html>
+    header {
+      width: 100%;
+      padding: 20px;
+      text-align: center;
+      background: #0077ff;
+      color: white;
+      font-size: 1.6em;
+      font-weight: 600;
+    }
+
+    .container {
+      margin-top: 40px;
+      width: 90%;
+      max-width: 600px;
+      background: #fff;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    p {
+      color: #555;
+    }
+
+    button {
+      background: #0077ff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background: #005fcc;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 15px;
+      font-size: 0.9em;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <header>🌐 Newsletter Dashboard</header>
+
+  <div class="container">
+    <h2 id="welcomeText">Checking login...</h2>
+    <p>Here you can submit stories, check community updates, and manage your profile.</p>
+    <button onclick="goToCommunity()">Go to Community</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <footer>© 2025 Newsletter Community. All Rights Reserved.</footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        const userEmail = localStorage.getItem("userEmail");
+
+        if (!userEmail) {
+          alert("Please login first");
+          window.location.href = "login.html";
+          return;
+        }
+
+        // ✅ Update the welcome text
+        document.getElementById("welcomeText").textContent = `Welcome, ${userEmail}! 🎉`;
+      }, 150);
+    });
+
+    function logout() {
+      localStorage.removeItem("userEmail");
+      alert("Logged out successfully!");
+      window.location.href = "login.html";
+    }
+
+    function goToCommunity() {
+      window.location.href = "community.html";
+    }
+  </script>
+</body>
+</html>
