@@ -1,48 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login – Newsletter Community</title>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      background: linear-gradient(135deg, #bbdefb, #e3f2fd);
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      margin: 0;
     }
+
     .login-box {
       background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
       width: 350px;
       text-align: center;
+      padding: 30px;
+      position: relative;
     }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #1565c0;
+    }
+
     input {
-      width: 90%;
+      width: 85%;
       padding: 10px;
-      margin: 8px 0;
+      margin: 10px 0;
       border: 1px solid #ccc;
       border-radius: 8px;
+      font-size: 15px;
     }
+
     button {
-      background: #2196f3;
+      background-color: #1976d2;
       color: white;
       border: none;
+      border-radius: 8px;
       padding: 10px 20px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #0d47a1;
+    }
+
+    /* Popup styling */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 25px 35px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .popup-content h3 {
+      margin-bottom: 10px;
+      color: #1565c0;
+    }
+
+    .popup-content p {
+      margin-bottom: 0;
+      color: #555;
+    }
+
+    .close-btn {
+      margin-top: 15px;
+      padding: 6px 15px;
+      border: none;
+      background: #1976d2;
+      color: white;
       border-radius: 8px;
       cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background: #1976d2;
-    }
-    .message {
-      margin-top: 10px;
-      font-size: 14px;
     }
   </style>
 </head>
@@ -54,26 +109,50 @@
     <input type="email" id="email" placeholder="Your email" required><br>
     <input type="text" id="pin" maxlength="6" placeholder="6-digit PIN" required><br>
     <button id="loginBtn">Login</button>
-    <div class="message" id="msg"></div>
+  </div>
+
+  <!-- Popup -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <h3 id="popupTitle">Please wait...</h3>
+      <p id="popupMsg">Verifying your credentials...</p>
+      <button class="close-btn" id="closePopup" style="display:none;">OK</button>
+    </div>
   </div>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEfT01mPoVxLiJwknxGz0fPQXeX6l5KO8BW407MSRWThWQU6kjHTizi6d4XuzLy1E/exec";
     const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
 
+    const popup = document.getElementById("popup");
+    const popupTitle = document.getElementById("popupTitle");
+    const popupMsg = document.getElementById("popupMsg");
+    const closePopup = document.getElementById("closePopup");
+
+    function showPopup(title, message, autoClose = false) {
+      popupTitle.textContent = title;
+      popupMsg.textContent = message;
+      popup.style.display = "flex";
+
+      if (autoClose) {
+        closePopup.style.display = "none";
+      } else {
+        closePopup.style.display = "inline-block";
+      }
+    }
+
+    closePopup.onclick = () => popup.style.display = "none";
+
     document.getElementById("loginBtn").addEventListener("click", async () => {
       const email = document.getElementById("email").value.trim();
       const pin = document.getElementById("pin").value.trim();
-      const msg = document.getElementById("msg");
 
       if (!email || !pin) {
-        msg.textContent = "⚠️ Please enter both email and PIN.";
-        msg.style.color = "red";
+        showPopup("⚠️ Missing Info", "Please enter both email and PIN.");
         return;
       }
 
-      msg.textContent = "⏳ Verifying...";
-      msg.style.color = "#555";
+      showPopup("⏳ Verifying...", "Please wait a moment...", true);
 
       try {
         const params = new URLSearchParams({
@@ -84,34 +163,26 @@
           origin: window.location.origin
         });
 
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: params
-        });
-
+        const response = await fetch(SCRIPT_URL, { method: "POST", body: params });
         const text = await response.text();
+
         console.log("Response:", text);
 
         if (text.includes("Success: Verified")) {
-          msg.textContent = "✅ Login successful! Redirecting...";
-          msg.style.color = "green";
+          showPopup("✅ Login Successful", "Redirecting to your dashboard...", true);
 
-          // Save session info (optional)
           localStorage.setItem("userEmail", email);
 
-          // Redirect after 1.5 seconds
           setTimeout(() => {
             window.location.href = "dashboard.html";
-          }, 150);
+          }, 1800);
         } else {
-          msg.textContent = text.replace("Error:", "⚠️");
-          msg.style.color = "red";
+          showPopup("❌ Login Failed", "Invalid email or PIN. Please try again.");
         }
 
       } catch (err) {
-        msg.textContent = "❌ Network error. Please try again.";
-        msg.style.color = "red";
         console.error(err);
+        showPopup("⚠️ Error", "Network error. Please try again later.");
       }
     });
   </script>
