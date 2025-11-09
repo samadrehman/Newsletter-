@@ -16,35 +16,53 @@
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeHK6aNP-6z1c7T6X1H9JxGK5gMkR6umLPrATSgVqgg0MUV9kCK3_qwHPLn3IDU98E/exec";
 const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
-function getFp(){ try{ return btoa(navigator.userAgent+"||"+screen.width+"x"+screen.height+"||"+Intl.DateTimeFormat().resolvedOptions().timeZone); }catch(e){return navigator.userAgent||"unk"} }
-function escapeHTML(s){ return (s||"").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-function getDeleted(){ return JSON.parse(localStorage.getItem('deletedPosts') || "[]"); }
-function saveDeleted(arr){ localStorage.setItem('deletedPosts', JSON.stringify(arr)); }
 
-async function loadPosts(){
-  const container = document.getElementById('posts');
-  container.innerHTML = "Loading...";
-  const url = SCRIPT_URL + "?action=getPosts&key=" + encodeURIComponent(SECRET_KEY) + "&ref=" + encodeURIComponent(window.location.origin) + "&fp=" + encodeURIComponent(getFp());
-  try{
-    const r = await fetch(url);
-    const txt = await r.text();
-    let posts = [];
-    try{ posts = JSON.parse(txt); }catch(e){ container.innerText = "Error loading posts"; return; }
-    const deleted = getDeleted();
-    if(!Array.isArray(posts) || posts.length===0){ container.innerHTML = "<div style='text-align:center;color:#666'>No posts yet.</div>"; return; }
+async function loadPosts() {
+  const container = document.getElementById("posts");
+  container.innerHTML = "<p>Loading posts...</p>";
+
+  try {
+    const response = await fetch(`${SCRIPT_URL}?action=getPosts&key=${SECRET_KEY}&origin=${window.location.origin}`);
+    const text = await response.text();
+    console.log("Raw response:", text);
+
+    let posts;
+    try {
+      posts = JSON.parse(text);
+    } catch (err) {
+      console.error("JSON parse error:", err);
+      container.innerHTML = "<p>Failed to load posts. Try again later.</p>";
+      return;
+    }
+
+    if (!posts || posts.length === 0) {
+      container.innerHTML = "<p>No posts yet. Be the first to share your story!</p>";
+      return;
+    }
+
     container.innerHTML = "";
-    posts.forEach(p=>{
-      if(deleted.includes(p.title)) return;
-      const card = document.createElement('div'); card.className='card';
-      card.innerHTML = "<h3>"+escapeHTML(p.title)+"</h3><small>by "+escapeHTML(p.name)+"</small><p>"+escapeHTML(p.content)+"</p>";
-      const btn = document.createElement('button'); btn.className='del'; btn.textContent='Delete';
-      btn.onclick = ()=>{ card.remove(); const arr=getDeleted(); if(!arr.includes(p.title)) arr.push(p.title); saveDeleted(arr); };
-      card.appendChild(btn); container.appendChild(card);
+    posts.reverse().forEach(post => {
+      const div = document.createElement("div");
+      div.className = "post";
+      div.innerHTML = `
+        <h3>${post.title}</h3>
+        <p>${post.content}</p>
+        <small>✍️ By ${post.name} • ${new Date(post.timestamp).toLocaleString()}</small>
+      `;
+      container.appendChild(div);
     });
-  }catch(err){
-    container.innerText = "Network error";
+  } catch (error) {
+    console.error("Error loading posts:", error);
+    container.innerHTML = "<p>Network error. Please try again later.</p>";
   }
 }
-loadPosts();
+
+document.addEventListener("DOMContentLoaded", loadPosts);
 </script>
+<div class="container">
+  <h2>📰 Community Stories</h2>
+  <div id="posts"></div>
+</div>
+
+
 </body></html>
