@@ -1,112 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Community – Newsletter</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creative Newsletter Community</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #fffaf0, #eef5ff);
-      padding: 24px;
-      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #f3f4f6;
+      color: #222;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
     }
-
-    h2 {
-      text-align: center;
-      color: #5c2e91;
-      margin-bottom: 20px;
+    h1 { text-align: center; margin-bottom: 20px; }
+    textarea, input, select {
+      width: 100%; padding: 10px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc;
     }
-
-    #posts {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      max-width: 1100px;
-      margin: 0 auto;
+    button {
+      background: #2563eb; color: white; border: none;
+      padding: 10px 20px; margin-top: 10px; border-radius: 8px; cursor: pointer;
     }
-
-    .card {
-      background: #fff;
-      padding: 14px;
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-      position: relative;
-      transition: transform 0.2s ease;
+    button:hover { background: #1d4ed8; }
+    .post {
+      background: white; padding: 15px; border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px;
     }
-
-    .card:hover {
-      transform: translateY(-3px);
-    }
-
-    .card h3 {
-      color: #4b2b7f;
-      margin-top: 0;
-    }
-
-    .card p {
-      color: #333;
-      white-space: pre-wrap;
-    }
-
-    .meta {
-      color: #555;
-      font-size: 14px;
-      margin-top: 8px;
-    }
+    .post h3 { margin: 0 0 5px 0; }
+    .meta { font-size: 0.9em; color: #555; }
   </style>
 </head>
 <body>
-  <h2>📰 Community Stories</h2>
-  <div id="posts">Loading posts...</div>
+  <h1>📰 Creative Community</h1>
+  <p>Write and share updates, stories, or ideas — no login needed!</p>
+
+  <section id="formSection">
+    <input id="title" placeholder="Your post title (optional)" />
+    <select id="category">
+      <option>General</option>
+      <option>News</option>
+      <option>Event</option>
+      <option>Idea</option>
+      <option>Art</option>
+    </select>
+    <textarea id="content" placeholder="Write your story or update..." rows="4"></textarea>
+    <button id="postBtn">Publish</button>
+  </section>
+
+  <h2 style="margin-top:30px;">Recent Posts</h2>
+  <div id="posts"></div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxpw09wT3pj0qhaRJ7R2NbftRC0OWUYxqCD3IJkiywDv9tgP7WWAOkGrFJN-utP_TOo/exec";
-    const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVkfjiTn8IeYxNYw0gcHjZfe_mEfr-Sic-Km3S8RR1D3G2ILeC-2Dnrw_kngJ40tJm/exec";
 
-    async function loadPosts() {
-      const container = document.getElementById("posts");
-      container.innerHTML = "<p>Loading posts...</p>";
+    document.getElementById("postBtn").addEventListener("click", async () => {
+      const title = document.getElementById("title").value.trim();
+      const content = document.getElementById("content").value.trim();
+      const category = document.getElementById("category").value;
+
+      if (!content) {
+        alert("Please write something before posting!");
+        return;
+      }
+
+      const data = { title, content, category };
 
       try {
-        const url = `${SCRIPT_URL}?action=getPosts&key=${SECRET_KEY}&origin=${window.location.origin}`;
-        const response = await fetch(url);
-        const text = await response.text();
-
-        console.log("Raw response:", text);
-
-        let posts;
-        try {
-          posts = JSON.parse(text);
-        } catch (err) {
-          console.error("JSON parse error:", err);
-          container.innerHTML = "<p>⚠️ Failed to load posts. Try again later.</p>";
-          return;
-        }
-
-        if (!posts || posts.length === 0) {
-          container.innerHTML = "<p>No posts yet. Be the first to share your story!</p>";
-          return;
-        }
-
-        container.innerHTML = "";
-        posts.reverse().forEach(post => {
-          const card = document.createElement("div");
-          card.className = "card";
-          card.innerHTML = `
-            <h3>${post.title}</h3>
-            <p>${post.content}</p>
-            <div class="meta">✍️ ${post.name} • ${new Date(post.timestamp).toLocaleString()}</div>
-          `;
-          container.appendChild(card);
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" },
         });
-      } catch (error) {
-        console.error("Error loading posts:", error);
-        container.innerHTML = "<p>Network error. Please try again later.</p>";
+        const text = await res.text();
+        alert(text);
+        loadPosts();
+        document.getElementById("content").value = "";
+        document.getElementById("title").value = "";
+      } catch (err) {
+        alert("Error posting: " + err);
+      }
+    });
+
+    async function loadPosts() {
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const posts = await res.json();
+        const container = document.getElementById("posts");
+        container.innerHTML = "";
+
+        posts.reverse().forEach(p => {
+          const div = document.createElement("div");
+          div.className = "post";
+          div.innerHTML = `
+            <h3>${p.title}</h3>
+            <p>${p.content}</p>
+            <p class="meta">🧑 ${p.author} | 🕒 ${new Date(p.timestamp).toLocaleString()} | 🏷️ ${p.category}</p>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {
+        console.error(err);
       }
     }
 
-    document.addEventListener("DOMContentLoaded", loadPosts);
+    loadPosts();
   </script>
 </body>
 </html>

@@ -1,45 +1,37 @@
-<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>Subscribe</title>
-<style>
-  body{font-family:Arial,Helvetica,sans-serif;background:#f3f5ff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
-  .card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.08);width:360px}
-  input,button{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid #ddd}
-  button{background:#5c2e91;color:#fff;border:none}
-  .muted{color:#666;font-size:0.9rem;margin-top:8px}
-</style>
-</head><body>
-<div class="card">
-  <h2>Subscribe</h2>
-  <form id="subForm">
-    <input name="name" placeholder="Name">
-    <input name="email" type="email" placeholder="Email" required>
-    <!-- honeypot (hidden) -->
-    <input name="hp" style="display:none">
-    <button type="submit">Send PIN</button>
-  </form>
-  <div class="muted">After subscribing check your email for a 6-digit PIN. Then <a href="login.html">login</a>.</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Newsletter Community</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>📬 Newsletter Community</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="community.html">Community</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<div class="container">
+  <h2>Welcome to our Newsletter!</h2>
+  <p>
+    Stay updated with the latest stories, creative ideas, and community updates. 
+    Share your thoughts anonymously and enjoy reading posts from fellow subscribers.
+  </p>
+  <div class="cta-buttons">
+    <a href="community.html"><button>Explore Community</button></a>
+    <a href="about.html"><button>Learn About Us</button></a>
+  </div>
 </div>
 
-<!-- common -->
-<script>
-/* paste client-common.js content here (or link it) */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxpw09wT3pj0qhaRJ7R2NbftRC0OWUYxqCD3IJkiywDv9tgP7WWAOkGrFJN-utP_TOo/exec";
-const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
-function getFingerprint(){ try { return btoa(navigator.userAgent+"||"+screen.width+"x"+screen.height+"||"+Intl.DateTimeFormat().resolvedOptions().timeZone); }catch(e){return navigator.userAgent||"unk"} }
-function appendCommon(fd){ fd.append("key", SECRET_KEY); fd.append("ref", window.location.origin); fd.append("fp", getFingerprint()); if(!fd.get("hp")) fd.append("hp",""); }
+<footer>
+  © 2025 Newsletter Community. All Rights Reserved.
+</footer>
 
-document.getElementById('subForm').addEventListener('submit', async function(ev){
-  ev.preventDefault();
-  const fd = new FormData(ev.target);
-  fd.append("action","subscribe");
-  appendCommon(fd);
-  try{
-    const r = await fetch(SCRIPT_URL, { method: "POST", body: fd });
-    const text = await r.text();
-    alert(text);
-    if(text.includes("PIN Sent")) window.location.href = "login.html";
-  }catch(err){ alert("Network error"); }
-});
-</script>
-</body></html>
+</body>
+</html>
