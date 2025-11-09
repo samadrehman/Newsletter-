@@ -1,68 +1,93 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>Community</title>
-<style>
-  body{font-family:Arial;background:linear-gradient(135deg,#fffaf0,#eef5ff);padding:24px;margin:0}
-  #posts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;max-width:1100px;margin:0 auto}
-  .card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.06);position:relative}
-  .del{position:absolute;right:10px;top:10px;background:#ff1744;color:#fff;border:none;padding:6px;border-radius:6px;cursor:pointer}
-  h3{color:#4b2b7f;margin:0 0 6px}
-  p{color:#333;white-space:pre-wrap}
-</style>
-</head><body>
-<h2 style="text-align:center;color:#5c2e91">Community Stories</h2>
-<div id="posts">Loading...</div>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Community</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #fffaf0, #eef5ff);
+      padding: 24px;
+      margin: 0;
+    }
+    #posts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .post {
+      background: #fff;
+      padding: 14px;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      position: relative;
+    }
+    h3 {
+      color: #4b2b7f;
+      margin: 0 0 6px;
+    }
+    p {
+      color: #333;
+      white-space: pre-wrap;
+    }
+    small {
+      color: #666;
+    }
+  </style>
+</head>
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeHK6aNP-6z1c7T6X1H9JxGK5gMkR6umLPrATSgVqgg0MUV9kCK3_qwHPLn3IDU98E/exec";
-const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
+<body>
+  <h2 style="text-align:center;color:#5c2e91">📰 Community Stories</h2>
+  <div id="posts">Loading...</div>
 
-async function loadPosts() {
-  const container = document.getElementById("posts");
-  container.innerHTML = "<p>Loading posts...</p>";
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeHK6aNP-6z1c7T6X1H9JxGK5gMkR6umLPrATSgVqgg0MUV9kCK3_qwHPLn3IDU98E/exec";
+    const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
 
-  try {
-    const response = await fetch(`${SCRIPT_URL}?action=getPosts&key=${SECRET_KEY}&origin=${window.location.origin}`);
-    const text = await response.text();
-    console.log("Raw response:", text);
+    async function loadPosts() {
+      const container = document.getElementById("posts");
+      container.innerHTML = "<p>Loading posts...</p>";
 
-    let posts;
-    try {
-      posts = JSON.parse(text);
-    } catch (err) {
-      console.error("JSON parse error:", err);
-      container.innerHTML = "<p>Failed to load posts. Try again later.</p>";
-      return;
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=getPosts&key=${SECRET_KEY}&origin=${window.location.origin}`);
+        const text = await response.text();
+        console.log("Raw response:", text);
+
+        let posts;
+        try {
+          posts = JSON.parse(text);
+        } catch (err) {
+          console.error("JSON parse error:", err);
+          container.innerHTML = "<p>Failed to load posts. Try again later.</p>";
+          return;
+        }
+
+        if (!posts || posts.length === 0) {
+          container.innerHTML = "<p>No posts yet. Be the first to share your story!</p>";
+          return;
+        }
+
+        container.innerHTML = "";
+        posts.reverse().forEach(post => {
+          const div = document.createElement("div");
+          div.className = "post";
+          div.innerHTML = `
+            <h3>${post.title}</h3>
+            <p>${post.content}</p>
+            <small>✍️ By ${post.name} • ${new Date(post.timestamp).toLocaleString()}</small>
+          `;
+          container.appendChild(div);
+        });
+      } catch (error) {
+        console.error("Error loading posts:", error);
+        container.innerHTML = "<p>Network error. Please try again later.</p>";
+      }
     }
 
-    if (!posts || posts.length === 0) {
-      container.innerHTML = "<p>No posts yet. Be the first to share your story!</p>";
-      return;
-    }
-
-    container.innerHTML = "";
-    posts.reverse().forEach(post => {
-      const div = document.createElement("div");
-      div.className = "post";
-      div.innerHTML = `
-        <h3>${post.title}</h3>
-        <p>${post.content}</p>
-        <small>✍️ By ${post.name} • ${new Date(post.timestamp).toLocaleString()}</small>
-      `;
-      container.appendChild(div);
-    });
-  } catch (error) {
-    console.error("Error loading posts:", error);
-    container.innerHTML = "<p>Network error. Please try again later.</p>";
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadPosts);
-</script>
-<div class="container">
-  <h2>📰 Community Stories</h2>
-  <div id="posts"></div>
-</div>
-
-
-</body></html>
+    document.addEventListener("DOMContentLoaded", loadPosts);
+  </script>
+</body>
+</html>
