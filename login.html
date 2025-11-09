@@ -13,7 +13,7 @@
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUSMmJgSq90xvbAjSYYCf24sq9iCOSa1SeK6jEdebrPBjFb_xEcXbq_LSTY5T6Z7Ks/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdpvyakf_u-bH5QkdEIRAk3iiwyVIOEcGoQcYdRN5iSozfWqyrYsNNVP8sfKCs7q7o/exec";
 const SECRET_KEY = "v8YhT93NfZ2jP6mXcA7rL1kE5s";
 function getFingerprint(){ try{ return btoa(navigator.userAgent+"||"+screen.width+"x"+screen.height+"||"+Intl.DateTimeFormat().resolvedOptions().timeZone);}catch(e){return navigator.userAgent||""}}
 function appendCommon(fd){ fd.append("key", SECRET_KEY); fd.append("ref", window.location.origin); fd.append("fp", getFingerprint()); if(!fd.get("hp")) fd.append("hp",""); }
