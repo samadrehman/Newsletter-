@@ -115,4 +115,37 @@ a {
   header h1 {
     font-size: 1.5em;
     }
-}
+}/* General Reset */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+
+/* Header */
+header { background:#1976d2; color:white; padding:15px 20px; }
+header h1 { display:inline-block; font-size:22px; }
+header nav ul { list-style:none; display:flex; justify-content:flex-end; }
+header nav ul li { display:inline-block; margin-left:15px; }
+header nav ul li a { color:white; text-decoration:none; font-weight:500; transition:0.3s; }
+header nav ul li a:hover { text-decoration:underline; }
+
+/* Hero Section */
+.hero, .about-hero { text-align:center; padding:60px 20px; background:linear-gradient(135deg,#bbdefb,#e3f2fd); border-radius:12px; margin:20px; }
+.hero h2, .about-hero h2 { font-size:28px; color:#1565c0; margin-bottom:15px; }
+.hero p, .about-hero p { font-size:16px; color:#333; margin-bottom:20px; }
+.btn { background:#1976d2; color:white; padding:12px 25px; border-radius:8px; text-decoration:none; font-weight:500; transition:0.3s; }
+.btn:hover { background:#0d47a1; }
+
+/* Advantages Cards */
+.advantages { max-width:1000px; margin:40px auto; padding:0 20px; text-align:center; }
+.advantages h2 { color:#5c2e91; margin-bottom:25px; font-size:24px; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+.card { background:white; padding:20px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.1); transition:0.3s; }
+.card:hover { transform:translateY(-5px); box-shadow:0 10px 25px rgba(0,0,0,0.15); }
+.card h3 { color:#4b2b7f; margin-bottom:10px; }
+.card p { color:#555; font-size:14px; line-height:1.5; }
+
+/* Team / About Section */
+.team { max-width:700px; margin:20px auto; padding:0 20px; }
+.team h2 { color:#5c2e91; margin-bottom:15px; text-align:center; }
+.team ul { list-style:disc inside; color:#333; line-height:1.6; }
+
+/* Footer */
+footer { text-align:center; padding:20px; background:#f0f0f0; color:#555; margin-top:40px; }
