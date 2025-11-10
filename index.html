@@ -1,55 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Newsletter Community</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community Stories</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #f8faff, #ffffff);
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    aside {
+      width: 300px;
+      background: #5c2e91;
+      color: #fff;
+      padding: 20px;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+    aside h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    input, textarea, button {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+
+    input, textarea {
+      width: 100%;
+    }
+
+    button {
+      background-color: #ffcb05;
+      color: #000;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #ffd84a;
+    }
+
+    main {
+      flex-grow: 1;
+      padding: 30px;
+    }
+
+    .post {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+
+    .post h3 {
+      margin: 0 0 6px;
+      color: #5c2e91;
+    }
+
+    .post small {
+      color: #777;
+      font-size: 12px;
+    }
+  </style>
 </head>
 <body>
+  <aside>
+    <h2>📝 Post Story</h2>
+    <form id="storyForm">
+      <input type="text" id="title" placeholder="Story Title" required />
+      <textarea id="content" placeholder="Share your thoughts..." rows="6" required></textarea>
+      <button type="submit">Post</button>
+    </form>
+  </aside>
 
-<header>
-  <nav>
-    <h1>📰 Newsletter Community</h1>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="community.html">Community</a></li>
-    </ul>
-  </nav>
-</header>
+  <main>
+    <h1>🌍 Community Stories</h1>
+    <div id="posts">Loading...</div>
+  </main>
 
-<section class="hero">
-  <h2>Stay Updated & Share Stories</h2>
-  <p>Our newsletter keeps you informed with the latest updates, trends, and community stories. Share your experiences anonymously or publicly with our friendly community.</p>
-  <a href="community.html" class="btn">Go to Community Stories</a>
-</section>
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwE80vtFrTw8mTmTp4KEvidKzufZ-lX3ALzGWtTjw-0JZYoBRIwFseiwkAuGvxxz5JN/exec";
 
-<section class="advantages">
-  <h2>Why Join Our Newsletter?</h2>
-  <div class="cards">
-    <div class="card">
-      <h3>📬 Instant Updates</h3>
-      <p>Receive latest news, stories, and updates directly in your inbox. Stay ahead without searching multiple sources.</p>
-    </div>
-    <div class="card">
-      <h3>✍️ Share Anonymously</h3>
-      <p>Post your stories, tips, and experiences without revealing your identity. Everyone’s voice matters!</p>
-    </div>
-    <div class="card">
-      <h3>🌐 Community Driven</h3>
-      <p>Connect with like-minded readers and contributors. Read, comment, and enjoy a safe, vibrant community.</p>
-    </div>
-    <div class="card">
-      <h3>💡 Creative Inspiration</h3>
-      <p>Discover ideas, projects, and insights shared by others. Grow your knowledge and creativity every day.</p>
-    </div>
-  </div>
-</section>
+    async function loadPosts() {
+      const postsContainer = document.getElementById("posts");
+      postsContainer.innerHTML = "Loading posts...";
+      try {
+        const res = await fetch(SCRIPT_URL + "?action=getPosts");
+        const posts = await res.json();
+        postsContainer.innerHTML = "";
 
-<footer>
-  <p>© 2025 Newsletter Community. All Rights Reserved.</p>
-</footer>
+        if (!posts.length) {
+          postsContainer.innerHTML = "<p>No stories yet. Be the first!</p>";
+          return;
+        }
 
+        posts.reverse().forEach(p => {
+          const div = document.createElement("div");
+          div.className = "post";
+          div.innerHTML = `
+            <h3>${p.title}</h3>
+            <p>${p.content}</p>
+            <small>${new Date(p.timestamp).toLocaleString()}</small>
+          `;
+          postsContainer.appendChild(div);
+        });
+      } catch (err) {
+        console.error(err);
+        postsContainer.innerHTML = "<p>Failed to load posts.</p>";
+      }
+    }
+
+    document.getElementById("storyForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const title = document.getElementById("title").value;
+      const content = document.getElementById("content").value;
+
+      const formData = new FormData();
+      formData.append("action", "addPost");
+      formData.append("title", title);
+      formData.append("content", content);
+
+      try {
+        await fetch(SCRIPT_URL, { method: "POST", body: formData });
+        document.getElementById("storyForm").reset();
+        loadPosts();
+      } catch (error) {
+        alert("Error posting story.");
+        console.error(error);
+      }
+    });
+
+    loadPosts();
+  </script>
 </body>
 </html>
