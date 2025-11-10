@@ -93,60 +93,75 @@
     <h1>🌍 Community Stories</h1>
     <div id="posts">Loading...</div>
   </main>
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbZZREE-bsRIQJqfdX58uQxxBO7XNkS2r2Mk29RBetHKJnr7THLzjpQsxjSBp73m-l/exec";
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOwsc2OR97zFK73Oghl6plIt50ooEugevqfjZuBQb3xf529uEA9xOYHfD0wfgjPWzG/exec";
+  // Load all posts from Google Sheet
+  async function loadPosts() {
+    const postsContainer = document.getElementById("posts");
+    postsContainer.innerHTML = "Loading posts...";
 
-    async function loadPosts() {
-      const postsContainer = document.getElementById("posts");
-      postsContainer.innerHTML = "Loading posts...";
-      try {
-        const res = await fetch(SCRIPT_URL + "?action=getPosts");
-        const posts = await res.json();
-        postsContainer.innerHTML = "";
+    try {
+      const res = await fetch(`${SCRIPT_URL}?action=getPosts`);
+      const posts = await res.json();
 
-        if (!posts.length) {
-          postsContainer.innerHTML = "<p>No stories yet. Be the first!</p>";
-          return;
-        }
+      postsContainer.innerHTML = "";
 
-        posts.reverse().forEach(p => {
-          const div = document.createElement("div");
-          div.className = "post";
-          div.innerHTML = `
-            <h3>${p.title}</h3>
-            <p>${p.content}</p>
-            <small>${new Date(p.timestamp).toLocaleString()}</small>
-          `;
-          postsContainer.appendChild(div);
-        });
-      } catch (err) {
-        console.error(err);
-        postsContainer.innerHTML = "<p>Failed to load posts.</p>";
+      if (!Array.isArray(posts) || posts.length === 0) {
+        postsContainer.innerHTML = "<p>No stories yet. Be the first!</p>";
+        return;
       }
+
+      // Show newest first
+      posts.reverse().forEach(p => {
+        const div = document.createElement("div");
+        div.className = "post";
+        div.innerHTML = `
+          <h3>${p.title}</h3>
+          <p>${p.content}</p>
+          <small>${p.timestamp}</small>
+        `;
+        postsContainer.appendChild(div);
+      });
+    } catch (err) {
+      console.error("Error loading posts:", err);
+      postsContainer.innerHTML = "<p>Failed to load posts.</p>";
+    }
+  }
+
+  // Handle form submission
+  document.getElementById("storyForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const title = document.getElementById("title").value.trim();
+    const content = document.getElementById("content").value.trim();
+
+    if (!title || !content) {
+      alert("Please fill in both title and content.");
+      return;
     }
 
-    document.getElementById("storyForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const title = document.getElementById("title").value;
-      const content = document.getElementById("content").value;
+    try {
+      const response = await fetch(`${SCRIPT_URL}?action=submitStory`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ title, content })
+      });
 
-      const formData = new FormData();
-      formData.append("action", "addPost");
-      formData.append("title", title);
-      formData.append("content", content);
+      const data = await response.json();
+      alert(data.message || "Story added!");
 
-      try {
-        await fetch(SCRIPT_URL, { method: "POST", body: formData });
-        document.getElementById("storyForm").reset();
-        loadPosts();
-      } catch (error) {
-        alert("Error posting story.");
-        console.error(error);
-      }
-    });
+      // Reset form and reload posts
+      document.getElementById("storyForm").reset();
+      loadPosts();
+    } catch (error) {
+      console.error("Error posting story:", error);
+      alert("Error posting story. Please try again.");
+    }
+  });
 
-    loadPosts();
-  </script>
+  // Initial load
+  loadPosts();
+</script>
+
 </body>
 </html>
