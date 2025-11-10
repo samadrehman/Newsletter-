@@ -1,166 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Community Stories</title>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #f8faff, #ffffff);
-      margin: 0;
-      display: flex;
-      min-height: 100vh;
-    }
-
-    aside {
-      width: 300px;
-      background: #5c2e91;
-      color: #fff;
-      padding: 20px;
-      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
-    }
-
-    aside h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    input, textarea, button {
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      font-size: 14px;
-    }
-
-    input, textarea {
-      width: 100%;
-    }
-
-    button {
-      background-color: #ffcb05;
-      color: #000;
-      cursor: pointer;
-      font-weight: 600;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      background-color: #ffd84a;
-    }
-
-    main {
-      flex-grow: 1;
-      padding: 30px;
-    }
-
-    .post {
-      background: white;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      margin-bottom: 20px;
-    }
-
-    .post h3 {
-      margin: 0 0 6px;
-      color: #5c2e91;
-    }
-
-    .post small {
-      color: #777;
-      font-size: 12px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Stories 🌟</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <aside>
-    <h2>📝 Post Story</h2>
-    <form id="storyForm">
-      <input type="text" id="title" placeholder="Story Title" required />
-      <textarea id="content" placeholder="Share your thoughts..." rows="6" required></textarea>
-      <button type="submit">Post</button>
-    </form>
-  </aside>
 
-  <main>
-    <h1>🌍 Community Stories</h1>
-    <div id="posts">Loading...</div>
-  </main>
+<header>
+  <h1>🌍 Community Stories</h1>
+  <p>Share your voice. Inspire the world.</p>
+</header>
+
+<button class="btn" id="developer"><a href="about.html">✍️ about developer</a></button>
+
+<input type="text" id="searchInput" placeholder="🔍 Search stories...">
+
+<div id="posts">Loading posts...</div>
+
+<button class="floating-btn" id="toggleForm">✍️ Post Your Story</button>
+
+<form id="storyForm">
+  <input type="text" id="title" placeholder="Story title" required>
+  <textarea id="content" rows="4" placeholder="Write your story..." required></textarea>
+  <button type="submit">Publish 🚀</button>
+</form>
+
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbZZREE-bsRIQJqfdX58uQxxBO7XNkS2r2Mk29RBetHKJnr7THLzjpQsxjSBp73m-l/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzidfGQ9i7zJ1yR0Vc57z6QGHGIj8xQGjSUDlup6RcscKpn69FBZP4h_kvm1zmuI_X9/exec"; // replace with your deployed Google Apps Script URL
 
-  // Load all posts from Google Sheet
-  async function loadPosts() {
-    const postsContainer = document.getElementById("posts");
-    postsContainer.innerHTML = "Loading posts...";
+const postsContainer = document.getElementById("posts");
+const searchInput = document.getElementById("searchInput");
 
-    try {
-      const res = await fetch(`${SCRIPT_URL}?action=getPosts`);
-      const posts = await res.json();
-
-      postsContainer.innerHTML = "";
-
-      if (!Array.isArray(posts) || posts.length === 0) {
-        postsContainer.innerHTML = "<p>No stories yet. Be the first!</p>";
-        return;
-      }
-
-      // Show newest first
-      posts.reverse().forEach(p => {
-        const div = document.createElement("div");
-        div.className = "post";
-        div.innerHTML = `
-          <h3>${p.title}</h3>
-          <p>${p.content}</p>
-          <small>${p.timestamp}</small>
-        `;
-        postsContainer.appendChild(div);
-      });
-    } catch (err) {
-      console.error("Error loading posts:", err);
-      postsContainer.innerHTML = "<p>Failed to load posts.</p>";
-    }
+// Load posts
+async function loadPosts() {
+  postsContainer.innerHTML = "Loading posts...";
+  try {
+    const res = await fetch(SCRIPT_URL + "?action=getPosts");
+    const data = await res.json();
+    displayPosts(data.reverse());
+  } catch (err) {
+    console.error(err);
+    postsContainer.innerHTML = "Failed to load posts.";
   }
+}
 
-  // Handle form submission
-  document.getElementById("storyForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    const title = document.getElementById("title").value.trim();
-    const content = document.getElementById("content").value.trim();
+function displayPosts(posts) {
+  const filter = searchInput.value.toLowerCase();
+  postsContainer.innerHTML = "";
 
-    if (!title || !content) {
-      alert("Please fill in both title and content.");
-      return;
-    }
-
-    try {
-      const response = await fetch(`${SCRIPT_URL}?action=submitStory`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ title, content })
-      });
-
-      const data = await response.json();
-      alert(data.message || "Story added!");
-
-      // Reset form and reload posts
-      document.getElementById("storyForm").reset();
-      loadPosts();
-    } catch (error) {
-      console.error("Error posting story:", error);
-      alert("Error posting story. Please try again.");
-    }
+  posts.filter(p => p.title.toLowerCase().includes(filter) || p.content.toLowerCase().includes(filter))
+       .forEach(p => {
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `
+      <h3>${p.title}</h3>
+      <p>${p.content}</p>
+      <div style="margin-top:10px;">
+        <small>${new Date(p.timestamp).toLocaleString()}</small>
+        <button class="like-btn" data-id="${p.id}">❤️ ${p.likes || 0}</button>
+      </div>
+    `;
+    postsContainer.appendChild(div);
   });
 
-  // Initial load
-  loadPosts();
+  document.querySelectorAll(".like-btn").forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.id;
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method:"POST",
+          body: new URLSearchParams({action:"likePost", id})
+        });
+        const data = await res.json();
+        if(data.status==="success") btn.innerText = `❤️ ${data.likes}`;
+      } catch(err) {console.error(err);}
+    };
+  });
+}
+
+searchInput.addEventListener("input", loadPosts);
+
+// Toggle post form
+document.getElementById("toggleForm").onclick = () => {
+  const form = document.getElementById("storyForm");
+  form.style.display = form.style.display==="block"?"none":"block";
+};
+
+document.getElementById("storyForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const title = document.getElementById("title").value.trim();
+  const content = document.getElementById("content").value.trim();
+  try {
+    await fetch(SCRIPT_URL, {
+      method:"POST",
+      body: new URLSearchParams({action:"addPost", title, content})
+    });
+    document.getElementById("storyForm").reset();
+    document.getElementById("storyForm").style.display="none";
+    loadPosts();
+  } catch(err) {
+    alert("Error posting story."); console.error(err);
+  }
+};
+
+loadPosts();
 </script>
 
 </body>
